@@ -22,56 +22,15 @@ import {
 import Link from 'next/link'
 import { Overview, OverviewProps } from './_components/overview'
 
-const calculatedDiff = (lastMonth: number, currentMonth: number) => {
-  return ((currentMonth - lastMonth) / (lastMonth || 1)) * 100 || 0
-}
-
 const longWeekday = (date: Date | null) => {
   return date?.toLocaleDateString('pt-BR', { weekday: 'short' }) || ''
 }
 
 export default async function Page() {
   const dateNextWeek = new Date(new Date().setDate(new Date().getDate() + 7))
-
-  const dateLastMonth = new Date(new Date().setMonth(new Date().getMonth() - 1))
   const dateCurrentMonth = new Date(new Date().setMonth(new Date().getMonth()))
 
-  const [
-    programmedLastMonth,
-    inProgressLastMonth,
-    finishedLastMonth,
-    preProgrammedLastMonth,
-
-    programmed,
-    inProgress,
-    finished,
-    preProgrammed,
-  ] = await Promise.all([
-    db.trip.count({
-      where: {
-        draft: false,
-        status: 'scheduled',
-        createdAt: { lte: dateLastMonth },
-      },
-    }),
-    db.trip.count({
-      where: {
-        draft: false,
-        status: { in: ['loaded', 'departure', 'terminal', 'unloaded'] },
-        createdAt: { lte: dateLastMonth },
-      },
-    }),
-    db.trip.count({
-      where: {
-        draft: false,
-        status: 'finished',
-        createdAt: { lte: dateLastMonth },
-      },
-    }),
-    db.trip.count({
-      where: { draft: true, createdAt: { lte: dateLastMonth } },
-    }),
-
+  const [programmed, inProgress, finished, preProgrammed] = await Promise.all([
     db.trip.count({
       where: {
         draft: false,
@@ -179,14 +138,7 @@ export default async function Page() {
             <div className="flex items-start justify-between space-x-4 p-6">
               <div>
                 <div className="text-sm font-medium">Progamados</div>
-
-                <div>
-                  <div className="text-2xl font-bold">{programmed}</div>
-                  <p className="text-xs text-muted-foreground">
-                    {calculatedDiff(programmedLastMonth, programmed).toFixed(2)}
-                    % do mês passado
-                  </p>
-                </div>
+                <div className="text-2xl font-bold">{programmed}</div>
               </div>
 
               <div className="rounded-lg bg-secondary p-2">
@@ -199,14 +151,7 @@ export default async function Page() {
             <div className="flex items-start justify-between space-x-4 p-6">
               <div>
                 <div className="text-sm font-medium">Em progresso</div>
-
-                <div>
-                  <div className="text-2xl font-bold">{inProgress}</div>
-                  <p className="text-xs text-muted-foreground">
-                    {calculatedDiff(inProgressLastMonth, inProgress).toFixed(2)}
-                    % do mês passado
-                  </p>
-                </div>
+                <div className="text-2xl font-bold">{inProgress}</div>
               </div>
 
               <div className="rounded-lg bg-secondary p-2">
@@ -219,14 +164,7 @@ export default async function Page() {
             <div className="flex items-start justify-between space-x-4 p-6">
               <div>
                 <div className="text-sm font-medium">Finalizados</div>
-
-                <div>
-                  <div className="text-2xl font-bold">{finished}</div>
-                  <p className="text-xs text-muted-foreground">
-                    {calculatedDiff(finishedLastMonth, finished).toFixed(2)}% do
-                    mês passado
-                  </p>
-                </div>
+                <div className="text-2xl font-bold">{finished}</div>
               </div>
 
               <div className="rounded-lg bg-secondary p-2">
@@ -239,17 +177,7 @@ export default async function Page() {
             <div className="flex items-start justify-between space-x-4 p-6">
               <div>
                 <div className="text-sm font-medium">Pré-progamados</div>
-
-                <div>
-                  <div className="text-2xl font-bold">{preProgrammed}</div>
-                  <p className="text-xs text-muted-foreground">
-                    {calculatedDiff(
-                      preProgrammedLastMonth,
-                      preProgrammed,
-                    ).toFixed(2)}
-                    % do mês passado
-                  </p>
-                </div>
+                <div className="text-2xl font-bold">{preProgrammed}</div>
               </div>
 
               <div className="rounded-lg bg-secondary p-2">

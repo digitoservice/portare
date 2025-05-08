@@ -12,11 +12,19 @@ type InputType = z.infer<typeof UnitUpdateSchema>
 type ReturnType = ActionState<InputType, Unit>
 
 const handler = async (data: InputType): Promise<ReturnType> => {
-  const { companyId, company } = data
+  const { companyId, identifier, company } = data
 
   let unit
 
   try {
+    if (identifier) {
+      const find = await db.unit.findFirst({
+        where: { NOT: { companyId }, identifier },
+      })
+
+      if (find) return { error: 'Já existe uma unidade com esse identificador' }
+    }
+
     const { data, error } = await action
       .company()
       .update({ id: companyId, ...company })
@@ -24,7 +32,7 @@ const handler = async (data: InputType): Promise<ReturnType> => {
     if (data) {
       unit = await db.unit.update({
         where: { companyId },
-        data: {},
+        data: { identifier },
         include: { company: true },
       })
     } else {

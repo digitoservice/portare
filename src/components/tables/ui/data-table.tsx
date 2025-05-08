@@ -46,7 +46,7 @@ export const DataTable = <TData, TValue>({
   )
   const [globalFilter, setGlobalFilter] = React.useState('')
   const [columnVisibility, setColumnVisibility] =
-    React.useState<VisibilityState>({ ID: false })
+    React.useState<VisibilityState>({ ID: false, Identificador: false })
   const [rowSelection, setRowSelection] = React.useState({})
 
   const table = useReactTable({

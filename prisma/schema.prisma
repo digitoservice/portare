@@ -294,6 +294,8 @@ model Unit {
   companyId Int     @id @map("company_id")
   company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
 
+  identifier String? @unique
+
   employees  Person[]
   aggregates Aggregate[]
   vehicles   Vehicle[]
@@ -302,6 +304,7 @@ model Unit {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
+  @@index([identifier])
   @@map("units")
 }
 

@@ -5,7 +5,7 @@ async function main() {
   // await db.$transaction([
   //   db.user.create({
   //     data: {
-  //       username: 'nicolasbaldoino',
+  //       username: 'nicolasbaldoino', // password: nico205@
   //       externalUserId: 'user_2bHmtB9K8lWIhDEJCiaYSNaTQu2',
   //       groups: { connect: { name: GROUP_ROOT } },
   //     },

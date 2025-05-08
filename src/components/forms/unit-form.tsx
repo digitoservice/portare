@@ -9,7 +9,15 @@ import { FormAlert } from '@/components/forms/ui/form-alert'
 import { FormFields } from '@/components/forms/ui/form-fields'
 import { FormSession } from '@/components/forms/ui/form-session'
 import { Button } from '@/components/ui/button'
-import { Form } from '@/components/ui/form'
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form'
+import { Input } from '@/components/ui/input'
 import { Separator } from '@/components/ui/separator'
 import { useToast } from '@/components/ui/use-toast'
 import { useAction } from '@/hooks/use-action'
@@ -33,6 +41,7 @@ export const UnitForm = ({ initialData }: { initialData?: UnitResource }) => {
 
   const onReset = () => {
     form.reset({
+      identifier: '',
       company: {
         name: '',
         tradeName: '',
@@ -103,6 +112,21 @@ export const UnitForm = ({ initialData }: { initialData?: UnitResource }) => {
             </div>
 
             <FormFields>
+              <div className="sm:col-span-3">
+                <FormField
+                  control={form.control}
+                  name="identifier"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Identificador</FormLabel>
+                      <FormControl>
+                        <Input {...field} className="uppercase" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
               <CompanyInformation />
             </FormFields>
           </FormSession>

@@ -23,7 +23,7 @@ TMS — Transportation Management System
 Clone the project
 
 ```bash
-  git clone https://github.com/baldoinocom/portare
+  git clone https://github.com/digitoservice/portare
 ```
 
 Navigate to the project directory

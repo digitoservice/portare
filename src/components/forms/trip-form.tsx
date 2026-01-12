@@ -71,7 +71,7 @@ import { useAction } from '@/hooks/use-action'
 import { formatTripStatus } from '@/lib/formatters'
 import { cn, nullAsUndefined } from '@/lib/utils'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Cargo, Trip, TripStatus } from '@prisma/client'
+import { Cargo, TripStatus } from '@prisma/client'
 import { Check, ChevronsUpDown, Edit3Icon, Loader2 } from 'lucide-react'
 import { usePathname, useRouter } from 'next/navigation'
 import * as React from 'react'
@@ -125,8 +125,8 @@ export const TripForm = ({
 
   const { create, createDraft, update, updateDraft } = action.trip()
 
-  const onSuccess = (data: Trip) => {
-    router.replace(String(data.id))
+  const onSuccess = () => {
+    router.replace(pathname.replace(/\/new$/, ''))
 
     toast({
       title: 'Viagem registrada com sucesso',

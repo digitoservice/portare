@@ -6,6 +6,8 @@ export const UnitIdSchema = z.object({
 })
 
 export const UnitSchema = z.object({
+  identifier: z.optional(z.string().trim().toUpperCase()),
+
   company: CompanyWithDocumentTypeSchema,
 })
 

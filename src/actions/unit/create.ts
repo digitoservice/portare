@@ -12,16 +12,22 @@ type InputType = z.infer<typeof UnitSchema>
 type ReturnType = ActionState<InputType, Unit>
 
 const handler = async (data: InputType): Promise<ReturnType> => {
-  const { company } = data
+  const { identifier, company } = data
 
   let unit
 
   try {
+    if (identifier) {
+      const find = await db.unit.findFirst({ where: { identifier } })
+
+      if (find) return { error: 'Já existe uma unidade com esse identificador' }
+    }
+
     const { data, error } = await action.company().create(company)
 
     if (data) {
       unit = await db.unit.create({
-        data: { company: { connect: { id: data.id } } },
+        data: { identifier, company: { connect: { id: data.id } } },
         include: { company: true },
       })
     } else {

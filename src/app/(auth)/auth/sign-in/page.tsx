@@ -20,7 +20,7 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import { useSignIn } from '@clerk/nextjs'
+import { signIn } from '@/lib/auth-client'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useForm } from 'react-hook-form'
@@ -40,8 +40,6 @@ const signInFormSchema = z.object({
 })
 
 export default function Page() {
-  const { signIn, setActive } = useSignIn()
-
   const router = useRouter()
   const searchParams = useSearchParams()
   const redirectUrl = searchParams?.get('redirect_url')
@@ -52,18 +50,15 @@ export default function Page() {
 
   const onSubmit = async (values: z.infer<typeof signInFormSchema>) => {
     try {
-      const result = await signIn?.create({
-        identifier: values.username,
-        password: values.password,
-      })
+      const result = await signIn.username(values)
 
-      if (result?.status === 'complete' && setActive) {
-        await setActive({ session: result.createdSessionId })
-
-        await revalidateAction()
-
-        return router.push(redirectUrl ?? '/#')
+      if (result.error) {
+        throw new Error('Usuário ou senha inválidos')
       }
+
+      await revalidateAction()
+
+      router.push(redirectUrl ?? '/#')
     } catch (error) {
       form.setError('root', { message: 'Usuário ou senha inválidos' })
     }

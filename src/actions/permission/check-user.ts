@@ -1,9 +1,10 @@
 'use server'
 
 import { db } from '@/lib/db'
+import { auth } from '@/lib/auth'
 import { extractPermission, PermissionGroupCode } from '@/permissions'
-import { currentUser } from '@clerk/nextjs'
 import { PermissionGuard } from '@prisma/client'
+import { headers } from 'next/headers'
 
 export const checkUserAction = async ({
   permission,
@@ -12,9 +13,11 @@ export const checkUserAction = async ({
   permission?: PermissionGroupCode[] | PermissionGroupCode
   guard?: PermissionGuard
 }): Promise<boolean> => {
-  const clerkUser = await currentUser()
+  const session = await auth.api.getSession({
+    headers: headers(),
+  })
 
-  if (!clerkUser || !permission || !guard) return false
+  if (!session?.user || !permission || !guard) return false
 
   let user
 
@@ -23,7 +26,7 @@ export const checkUserAction = async ({
 
     user = await db.user.findUnique({
       where: {
-        externalUserId: clerkUser.id,
+        id: session.user.id,
         groups: {
           some: {
             roles: {
@@ -38,7 +41,7 @@ export const checkUserAction = async ({
 
     user = await db.user.findUnique({
       where: {
-        externalUserId: clerkUser.id,
+        id: session.user.id,
         groups: {
           some: {
             roles: { some: { permissions: { some: { group, code, guard } } } },

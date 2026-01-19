@@ -13,10 +13,7 @@ TMS — Transportation Management System
 - Shadcn
 - TailwindCSS
 - Prisma.io
-
-## Services
-
-- Clerk (auth)
+- Better Auth (authentication)
 
 ## Running Locally
 

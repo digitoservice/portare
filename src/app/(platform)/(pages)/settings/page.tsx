@@ -1,6 +1,6 @@
 import { ProfileForm } from '@/components/forms/profile-form'
 import { Separator } from '@/components/ui/separator'
-import { currentUser } from '@/lib/auth-service'
+import { currentUser } from '@/lib/auth-server'
 
 export default async function Page() {
   const user = await currentUser()

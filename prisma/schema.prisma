@@ -29,21 +29,83 @@ enum ActionType {
   @@map("action_type")
 }
 
+model Session {
+  id        String   @id @default(cuid())
+  expiresAt DateTime @map("expires_at")
+  token     String   @unique
+  ipAddress String?  @map("ip_address")
+  userAgent String?  @map("user_agent")
+
+  userId String @map("user_id")
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([userId])
+  @@index([token])
+  @@map("sessions")
+}
+
+model Account {
+  id                    String    @id @default(cuid())
+  accountId             String    @map("account_id")
+  providerId            String    @map("provider_id")
+  accessToken           String?   @map("access_token") @db.Text
+  refreshToken          String?   @map("refresh_token") @db.Text
+  idToken               String?   @map("id_token") @db.Text
+  accessTokenExpiresAt  DateTime? @map("access_token_expires_at")
+  refreshTokenExpiresAt DateTime? @map("refresh_token_expires_at")
+  scope                 String?
+  password              String?
+
+  userId String @map("user_id")
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@unique([providerId, accountId])
+  @@index([userId])
+  @@map("accounts")
+}
+
+model Verification {
+  id         String   @id @default(cuid())
+  identifier String
+  value      String
+  expiresAt  DateTime @map("expires_at")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@unique([identifier, value])
+  @@index([identifier])
+  @@map("verifications")
+}
+
 model User {
-  id             String @id @default(uuid())
-  username       String @unique
-  externalUserId String @unique @map("external_user_id")
+  id              String  @id @default(cuid())
+  name            String
+  email           String  @unique
+  emailVerified   Boolean @default(false) @map("email_verified")
+  image           String?
+  username        String
+  displayUsername String  @map("display_username")
 
   personId Int?    @unique @map("person_id")
   person   Person? @relation(fields: [personId], references: [id], onDelete: Cascade)
 
   groups Group[] @relation("UserGroup", map: "user_group")
 
+  sessions Session[]
+  accounts Account[]
+
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
   @@index([username])
-  @@index([externalUserId])
+  @@index([email])
   @@index([personId])
   @@map("users")
 }
@@ -97,7 +159,7 @@ enum PermissionCode {
 
   navigate
 
-  updateStatus @map("update_status")
+  updateStatus
 
   @@map("permission_code")
 }
@@ -122,11 +184,11 @@ enum PermissionGroup {
 
   truck
   semiTrailer
-  trailerConfiguration @map("trailer_configuration")
-  trailerType          @map("trailer_type")
+  trailerConfiguration
+  trailerType
   cargo
-  trailerCertificate   @map("trailer_certificate")
-  stoppedVehicle       @map("stopped_vehicle")
+  trailerCertificate
+  stoppedVehicle
   brand
 
   mdfe
@@ -228,8 +290,8 @@ model AbsentDriver {
 }
 
 enum DriverStatus {
-  leaveOfAbsence     @map("leave_of_absence") // Afastado
-  medicalCertificate @map("medical_certificate") // Atestado
+  leaveOfAbsence // Afastado
+  medicalCertificate // Atestado
   break // Folga
   vacation // Férias
 
@@ -641,7 +703,7 @@ model Ticket {
 }
 
 enum TicketAction {
-  maintenanceRequest @map("maintenance_request") // Solicitação de manutenção
+  maintenanceRequest // Solicitação de manutenção
 
   @@map("ticket_action")
 }
@@ -680,7 +742,7 @@ model Notification {
 enum NotificationType {
   server // Servidor
   ticket // Chamado
-  ticketAnswered @map("ticket_answered") // Chamado respondido
+  ticketAnswered // Chamado respondido
 
   @@map("notification_type")
 }

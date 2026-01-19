@@ -1,4 +1,4 @@
-import { authenticated } from '@/lib/auth-service'
+import { authenticated } from '@/lib/auth-server'
 import { Authenticated } from './_components/authenticated'
 
 export default async function Layout({

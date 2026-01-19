@@ -34,7 +34,30 @@ export const updatePermissions = async () => {
     })
   }
 
-  await db.permission.createMany({ data, skipDuplicates: true })
+  // await db.permission.createMany({ data, skipDuplicates: true })
+
+  const total = data.length
+
+  for (let i = 0; i < data.length; i++) {
+    const permission = data[i]
+
+    await db.permission.upsert({
+      where: {
+        group_code_guard: {
+          group: permission.group,
+          code: permission.code,
+          guard: permission.guard,
+        },
+      },
+      create: permission,
+      update: permission,
+    })
+
+    await new Promise((resolve) => setTimeout(resolve, 25))
+
+    const progress = ((i + 1) / total) * 100
+    console.info(`Progress: ${progress.toFixed(2)}%`)
+  }
 
   const ids = await db.permission.findMany({ select: { id: true } })
 

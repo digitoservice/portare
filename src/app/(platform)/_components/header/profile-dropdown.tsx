@@ -8,7 +8,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { currentUser } from '@/lib/auth-service'
+import { currentUser } from '@/lib/auth-server'
 import { ChevronDownIcon } from 'lucide-react'
 import Link from 'next/link'
 import { userNavigation } from '../data'

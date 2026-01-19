@@ -106,7 +106,7 @@ export const UserFormDialog = ({
   const onSubmit = async (values: z.infer<typeof UserUpsertSchema>) => {
     if (initialData) {
       await executeUpdate({
-        externalUserId: initialData.externalUserId,
+        id: initialData.id,
         ...values,
       })
     } else {

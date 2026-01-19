@@ -1,7 +1,28 @@
 import { db } from '@/lib/db'
+import { updatePermissions } from './update-permissions'
+import { auth } from '@/lib/auth'
 
 async function main() {
-  // await updatePermissions()
+  await updatePermissions()
+
+  const existingUser = await db.user.findFirst({ where: { username: 'admin' } })
+
+  if (!existingUser) {
+    const user = {
+      username: 'admin',
+      password: 'supersecret',
+    }
+
+    await auth.api.signUpEmail({
+      body: {
+        name: user.username,
+        email: `${user.username}@portare.local`,
+        username: user.username,
+        password: user.password,
+      },
+    })
+  }
+
   // await db.$transaction([
   //   db.user.create({
   //     data: {

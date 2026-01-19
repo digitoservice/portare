@@ -81,7 +81,7 @@ export const CellActions = ({
   item: UserResource
   groups?: GroupResource[]
 }) => {
-  const { externalUserId } = item
+  const { id } = item
 
   const { toast } = useToast()
 
@@ -104,7 +104,7 @@ export const CellActions = ({
   })
 
   const handleDelete = async () => {
-    await execute({ externalUserId })
+    await execute({ id })
   }
 
   return (

@@ -2,51 +2,63 @@
 
 import { db } from '@/lib/db'
 import { ActionState, safeAction } from '@/lib/safe-action'
-import { emptyAsNull } from '@/lib/utils'
-import clerk, { User } from '@clerk/clerk-sdk-node'
+import { User } from '@prisma/client'
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 import { UserUpdateSchema } from './schema'
+import { hashPassword } from '@/lib/password'
 
 type InputType = z.infer<typeof UserUpdateSchema>
 type ReturnType = ActionState<InputType, User>
 
 const handler = async (data: InputType): Promise<ReturnType> => {
-  const { externalUserId, username, password, groups } = data
-
-  let user
+  const { id, username, password, groups } = data
 
   try {
-    if (username) {
+    const existingUser = await db.user.findUniqueOrThrow({
+      where: { id },
+    })
+
+    if (username && username !== existingUser.username) {
       const find = await db.user.findFirst({
-        where: { NOT: { externalUserId }, username },
+        where: { NOT: { id }, username },
       })
 
-      if (find) return { error: 'Já existe um usuário com esse nome' }
+      if (find) {
+        return { error: 'Já existe um usuário com esse nome' }
+      }
     }
 
-    await db.user.update({
-      where: { externalUserId },
+    const user = await db.user.update({
+      where: { id },
       data: {
+        name: username || undefined,
+        email: username ? `${username}@portare.local` : undefined,
+        username: username || undefined,
+        displayUsername: username || undefined,
         groups: { set: (groups || []).filter(Boolean) as { id: number }[] },
       },
     })
 
-    user = await clerk.users.updateUser(externalUserId, {
-      username,
-      password: emptyAsNull(password) || undefined,
-      skipPasswordChecks: true,
-    })
+    if (password) {
+      await db.account.updateMany({
+        where: {
+          userId: id,
+        },
+        data: {
+          password: await hashPassword(password),
+        },
+      })
+    }
+
+    revalidatePath(`/system/users/${id}`)
+    revalidatePath('/system/users')
+    revalidatePath('/')
+
+    return { data: user }
   } catch (error) {
     return { error: 'Ocorreu um erro ao atualizar, tente novamente mais tarde' }
   }
-
-  revalidatePath(`/system/users/${externalUserId}`)
-  revalidatePath('/system/users')
-
-  revalidatePath('/')
-
-  return { data: JSON.parse(JSON.stringify(user)) }
 }
 
 export const updateAction = safeAction(UserUpdateSchema, handler)

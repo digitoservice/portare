@@ -1,7 +1,7 @@
 import { z } from 'zod'
 
 export const UserIdSchema = z.object({
-  externalUserId: z.string(),
+  id: z.string(),
 })
 
 export const UserSchema = z.object({

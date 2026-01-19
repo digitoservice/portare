@@ -1,4 +1,4 @@
-import { userPermissions } from '@/lib/auth-service'
+import { userPermissions } from '@/lib/auth-server'
 import { ShieldClientProvider } from './client'
 
 export const ShieldProvider = async ({

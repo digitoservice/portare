@@ -1,11 +1,13 @@
 'use server'
 
 import { db } from '@/lib/db'
+import { auth } from '@/lib/auth'
 import { ActionState, safeAction } from '@/lib/safe-action'
-import clerk, { User } from '@clerk/clerk-sdk-node'
+import { headers } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 import { UserSchema } from './schema'
+import { User } from 'better-auth'
 
 type InputType = z.infer<typeof UserSchema>
 type ReturnType = ActionState<InputType, User>
@@ -13,27 +15,33 @@ type ReturnType = ActionState<InputType, User>
 const handler = async (data: InputType): Promise<ReturnType> => {
   const { username, password } = data
 
-  let user
-
   try {
-    if (username) {
-      const find = await db.user.findFirst({ where: { username } })
+    const existingUser = await db.user.findFirst({ where: { username } })
 
-      if (find) return { error: 'Já existe um usuário com esse nome' }
+    if (existingUser) {
+      return { error: 'Já existe um usuário com esse nome' }
     }
 
-    user = await clerk.users.createUser({
-      username,
-      password,
-      skipPasswordChecks: true,
+    const { user } = await auth.api.signUpEmail({
+      body: {
+        name: username,
+        email: `${username}@portare.local`,
+        username,
+        password,
+      },
+      headers: headers(),
     })
+
+    if (!user) {
+      return { error: 'Ocorreu um erro ao criar, tente novamente mais tarde' }
+    }
+
+    revalidatePath('/system/users')
+
+    return { data: user }
   } catch (error) {
     return { error: 'Ocorreu um erro ao criar, tente novamente mais tarde' }
   }
-
-  revalidatePath('/system/users')
-
-  return { data: JSON.parse(JSON.stringify(user)) }
 }
 
 export const createAction = safeAction(UserSchema, handler)
